@@ -1,14 +1,4 @@
 #lang racket
-
-(define (rand num cycles)
-  (cond
-    ((zero? cycles)
-     '())
-    (else
-     (cons (list (random num)) (rand num (- cycles 1))))))
-
-(rand 2 10)
-
 ;; First Gen
 
 (define (Population teams defenders1 midFilders1 forwards1 defenders2 midFilders2 forwards2  )
