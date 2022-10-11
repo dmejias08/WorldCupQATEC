@@ -66,8 +66,37 @@
 ;; #### Genetic Algorithm ####
 ;; ###########################
 
+(define (quicksort list)
+  (cond ( (null? list)
+          '())
+        ( else
+          (quicksort-aux (caar list) (car list) (cdr list)))))
+
+(define (quicksort-aux pivot pivotList list1)
+  (cond ( (null? list1)
+          (list pivotList))
+        ( else
+          (append (quicksort (smaller-list pivot list1)) (list pivotList) (quicksort (larger-list pivot list1))) )))
+
+(define (smaller-list pivot list)
+  (cond ( (null? list)
+          '())
+        ( (< (caar list) pivot)
+          (cons (car list) (smaller-list pivot (cdr list))))
+        ( else
+          (smaller-list pivot  (cdr list)))))
+
+(define (larger-list pivot list)
+  (cond ( (null? list)
+          '())
+        ( (>= (caar list) pivot)
+          (cons (car list) (larger-list pivot (cdr list))))
+        ( else
+          (larger-list pivot (cdr list)))))
 
 
+
+(quicksort '((4 (1 0 1 1) (1 0 0 0) (1 0 1 0)) (1 (1 1 1 1) (1 0 0 0) (1 1 0 0)) (2 (1 1 0 1) (0 0 1 1) (1 0 1 1))))
 ;; ########################################################
 ;; Mutation
 ;; It takes a random bit and exchange it to its contrary
@@ -173,4 +202,4 @@
 
 
 
-(Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2))
+;;(Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2))
