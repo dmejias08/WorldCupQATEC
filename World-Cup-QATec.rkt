@@ -76,7 +76,7 @@
   (cond ( (null? list1)
           (list pivotList))
         ( else
-          (append (quicksort (smaller-list pivot list1)) (list pivotList) (quicksort (larger-list pivot list1))) )))
+          (append  (quicksort (larger-list pivot list1)) (list pivotList)  (quicksort (smaller-list pivot list1))) )))
 
 (define (smaller-list pivot list)
   (cond ( (null? list)
@@ -94,9 +94,102 @@
         ( else
           (larger-list pivot (cdr list)))))
 
+(define (SortList population)
+  (cond
+    ((null? population)
+     '())
+    (else
+     (cons (quicksort (car population)) (SortList (cdr population))))))
+
+;; ########################################################
+;; Fitness
+;; It takes a random bit and exchange it to its contrary
+;; arguments:
+;; player -> a member of the population who will mutate
+;; return: ((velocity) (force) (hability))
+;; ########################################################
+
+(define (Fitness population)
+  (cond
+    ((null? population)
+     '())
+    (else
+     (cons (FitnessTeam (car population)) (Fitness (cdr population))))))
+
+(define (FitnessTeam team)
+  (cond
+    ((null? team)
+     '())
+    (else
+     (cons (FitnessPlayer (car team) '()) (FitnessTeam (cdr team))))))
+
+(define (FitnessPlayer player resultPlayer)
+  (cond
+    ((not (list? (car player)))
+     (cons (FitnessPlayerAux resultPlayer) resultPlayer))
+    (else
+     (FitnessPlayer (cdr player) (cons (car player) resultPlayer)))))
+
+(define (FitnessPlayerAux player)
+  (cond
+    ((null? player)
+     0)
+    (else ( + (CountOnes (car player)) (FitnessPlayerAux (cdr player))))))
 
 
-(quicksort '((4 (1 0 1 1) (1 0 0 0) (1 0 1 0)) (1 (1 1 1 1) (1 0 0 0) (1 1 0 0)) (2 (1 1 0 1) (0 0 1 1) (1 0 1 1))))
+(define (CountOnes attribute)
+  (cond
+    ((null? attribute)
+     0)
+    ((equal? (car attribute) 1)
+     (+ 1 (CountOnes (cdr attribute))))
+    (else
+     (CountOnes (cdr attribute)))))
+
+
+
+
+(define (Selection population selectedNum )
+  (cond
+    ((null? population)
+     '())
+    (else
+     (cons (SelectionAux (car population) selectedNum ) (Selection (cdr population) selectedNum) ))))
+
+
+ (define (SelectionAux team selectedNum)
+   (cond
+     ((zero? selectedNum)
+      '())
+     (else
+      (cons (car team) (SelectionAux (cdr team) (- selectedNum 1))))))
+
+
+
+(define (Reproduction population)
+  (cond
+    ((null? population)
+     '())
+    (else
+     (cons (ReproductionTeams (car population)) (Reproduction (cdr population)) ))))
+
+(define (ReproductionPlayers player1 player2)
+  (cond
+    ((and (null? player1) (null? player2))
+     '())
+    (else
+     (cons (Combination (car player1) (car player2) 1) (ReproductionPlayers (cdr player1) (cdr player2))))))
+
+(define (Combination attribute1 attribute2 times)
+  (cond
+    ((zero? times)
+     '())
+    (else
+     ( cons (list (car attribute1) (car(cdr attribute1)) (car attribute2) (car(cdr attribute2))) (Combination attribute1 attribute2 (- times 1)) ))))
+
+
+(ReproductionPlayers '((1 0 1 1) (1 1 0 0) (1 1 1 0)) '((0 1 0 ) (1 0 0 0) (0 0 0 0)))
+
 ;; ########################################################
 ;; Mutation
 ;; It takes a random bit and exchange it to its contrary
@@ -201,5 +294,6 @@
    (cons (car attributes) (Player playerId (cdr attributes))))))
 
 
-
-;;(Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2))
+(Selection (SortList (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))) 6)
+;; (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))
+;; (Fitness '((((1 1 1 1) (0 0 0 0) (1 0 1 0) 1) ( (1 1 1 0) (1 1 1 0) (1 1 1 0) 2)) (((0 0 0 0) (0 0 0 0) (0 0 0 0) 1 ) ((1 1 1 1) (1 1 1 1) (1 1 1 1) 2))))
