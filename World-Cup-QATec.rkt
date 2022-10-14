@@ -246,14 +246,14 @@
   ((equal? (cdr team) '())
    (ReproductionTeamsAux teamCopy))
   (else
-   (cons (ReproductionPlayers (cdr (car team)) (cdr (car (cdr team)))) (ReproductionTeams (cdr team) teamCopy)))))
+   (cons (Mutation (ReproductionPlayers (cdr (car team)) (cdr (car (cdr team))))) (ReproductionTeams (cdr team) teamCopy)))))
 
 (define (ReproductionTeamsAux team)
   (cond
     ((null? team)
      '())
     (else
-     (cons (cdr (car team)) (ReproductionTeamsAux (cdr team))))))
+     (cons (Mutation (cdr (car team))) (ReproductionTeamsAux (cdr team))))))
 
 ;; ########################################################
 ;; Reproduction Players
@@ -391,18 +391,22 @@
   (else
    (cons (car attributes) (Player playerId (cdr attributes))))))
 
-(Reproduction '(((10 (0 1 1 1) (1 1 1 1) (0 1 1 1))
-   (8 (1 1 1 0) (1 0 1 1) (1 1 0 0))
-   (7 (1 1 0 0) (1 1 0 1) (0 1 1 0))
-   (7 (1 1 1 1) (1 1 0 1) (0 0 0 0))
-   (7 (1 0 1 1) (1 1 1 0) (0 0 1 0))
-   (7 (1 0 1 1) (1 1 0 1) (0 1 0 0)))
-  ((9 (1 1 1 0) (1 0 1 1) (1 1 0 1))
-   (8 (0 1 1 1) (1 0 1 0) (1 1 1 0))
-   (8 (1 0 0 1) (1 1 1 1) (0 0 1 1))
-   (8 (1 1 0 1) (1 0 1 1) (0 0 1 1))
-   (6 (1 1 0 0) (1 1 0 0) (0 1 1 0))
-   (6 (1 0 0 0) (1 0 0 1) (0 1 1 1)))))
+;;(Reproduction '(((10 (0 1 1 1) (1 1 1 1) (0 1 1 1))
+  ;; (8 (1 1 1 0) (1 0 1 1) (1 1 0 0))
+  ;;(7 (1 1 0 0) (1 1 0 1) (0 1 1 0))
+  ;;(7 (1 1 1 1) (1 1 0 1) (0 0 0 0))
+  ;;(7 (1 0 1 1) (1 1 1 0) (0 0 1 0))
+  ;;(7 (1 0 1 1) (1 1 0 1) (0 1 0 0)))
+  ;;((9 (1 1 1 0) (1 0 1 1) (1 1 0 1))
+  ;;(8 (0 1 1 1) (1 0 1 0) (1 1 1 0))
+  ;;(8 (1 0 0 1) (1 1 1 1) (0 0 1 1))
+  ;;(8 (1 1 0 1) (1 0 1 1) (0 0 1 1))
+  ;;(6 (1 1 0 0) (1 1 0 0) (0 1 1 0)) 
+  ;;(6 (1 0 0 0) (1 0 0 1) (0 1 1 1)))))
+
+(Population 2 4 4 2 5 3 2(Reproduction (Selection (SortList (Fitness(Population 2 4 4 2 5 3 2 (Reproduction (Selection (SortList (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))) 6))))) 6)))
+;;(Reproduction (Selection (SortList (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))) 6))
 ;;(Selection (SortList (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))) 6)
 ;; (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))
 ;; (Fitness '((((1 1 1 1) (0 0 0 0) (1 0 1 0) 1) ( (1 1 1 0) (1 1 1 0) (1 1 1 0) 2)) (((0 0 0 0) (0 0 0 0) (0 0 0 0) 1 ) ((1 1 1 1) (1 1 1 1) (1 1 1 1) 2))))
+;;(Population 2 4 4 2 5 3 2 (Reproduction (Selection (SortList (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))) 6)))
