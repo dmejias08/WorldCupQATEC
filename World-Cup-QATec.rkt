@@ -66,18 +66,47 @@
 ;; #### Genetic Algorithm ####
 ;; ###########################
 
+
+;; ########################################################
+;; QuickSort
+;; It sorts a list using quicksort algorithm
+;; arguments:
+;; list: list of elements in disorder
+;; Returns: a sorted list
+;; ########################################################
 (define (quicksort list)
   (cond ( (null? list)
           '())
         ( else
           (quicksort-aux (caar list) (car list) (cdr list)))))
 
+
+
+;; ########################################################
+;; QuickSort - Auxiliar
+;; It is a quicksort auxiliar, that gets the pivot to compare
+;; and a sublist
+;; arguments:
+;; list: list of elements in disorder
+;; pivot: an interger to compare each elemento of the list 
+;; Returns: a sorted list
+;; ########################################################
 (define (quicksort-aux pivot pivotList list1)
   (cond ( (null? list1)
           (list pivotList))
         ( else
           (append  (quicksort (larger-list pivot list1)) (list pivotList)  (quicksort (smaller-list pivot list1))) )))
 
+
+
+;; ########################################################
+;; Smaller list analizer
+;; It a quicksort auxiliar that analize numbers less than the pivot
+;; arguments:
+;; list: list of elements in disorder
+;; pivot: an interger to compare each elemento of the list 
+;; Returns: a sorted list 
+;; ########################################################
 (define (smaller-list pivot list)
   (cond ( (null? list)
           '())
@@ -86,6 +115,16 @@
         ( else
           (smaller-list pivot  (cdr list)))))
 
+
+
+;; ########################################################
+;; Larger list analizer
+;; It a quicksort auxiliar that analize numbers greater than the pivot
+;; arguments:
+;; list: list of elements in disorder
+;; pivot: an interger to compare each elemento of the list 
+;; Returns: a sorted list 
+;; ########################################################
 (define (larger-list pivot list)
   (cond ( (null? list)
           '())
@@ -94,12 +133,22 @@
         ( else
           (larger-list pivot (cdr list)))))
 
+
+
+;; ########################################################
+;; QuickSort
+;; It sorts a list using quicksort algorithm
+;; arguments:
+;; population: list of two teams
+;; Returns: a sorted team
+;; ########################################################
 (define (SortList population)
   (cond
     ((null? population)
      '())
     (else
      (cons (quicksort (car population)) (SortList (cdr population))))))
+
 
 ;; ########################################################
 ;; Fitness
@@ -130,6 +179,8 @@
     (else
      (FitnessPlayer (cdr player) (cons (car player) resultPlayer)))))
 
+
+
 (define (FitnessPlayerAux player)
   (cond
     ((null? player)
@@ -157,6 +208,7 @@
      (cons (SelectionAux (car population) selectedNum ) (Selection (cdr population) selectedNum) ))))
 
 
+
  (define (SelectionAux team selectedNum)
    (cond
      ((zero? selectedNum)
@@ -165,14 +217,51 @@
       (cons (car team) (SelectionAux (cdr team) (- selectedNum 1))))))
 
 
-
+;; ########################################################
+;; Reproduction
+;; It takes the selected population of 6 individuals and creates five more individuals
+;; arguments:
+;; population -> 6 indiviiduals
+;; returns -> List with two teams with all their members
+;; ########################################################
 (define (Reproduction population)
   (cond
     ((null? population)
      '())
     (else
-     (cons (ReproductionTeams (car population)) (Reproduction (cdr population)) ))))
+     (cons (ReproductionTeams (car population) (car population)) (Reproduction (cdr population)) ))))
 
+
+
+;; ########################################################
+;; Reproduction Teams
+;; It creates the final team with the beset 6 players and then reproduce it
+;; arguments:
+;; team -> initial team to iterate over it
+;; teamCopy -> a copy of the selected players
+;; returns -> List with one team that has all members
+;; ########################################################
+(define (ReproductionTeams team teamCopy)
+  (cond
+  ((equal? (cdr team) '())
+   (ReproductionTeamsAux teamCopy))
+  (else
+   (cons (ReproductionPlayers (cdr (car team)) (cdr (car (cdr team)))) (ReproductionTeams (cdr team) teamCopy)))))
+
+(define (ReproductionTeamsAux team)
+  (cond
+    ((null? team)
+     '())
+    (else
+     (cons (cdr (car team)) (ReproductionTeamsAux (cdr team))))))
+
+;; ########################################################
+;; Reproduction Players
+;; It takes two players and combine them 
+;; arguments:
+;; player1, player2 -> two players 
+;; returns -> A list of one player 
+;; ########################################################
 (define (ReproductionPlayers player1 player2)
   (cond
     ((and (null? player1) (null? player2))
@@ -180,15 +269,24 @@
     (else
      (cons (Combination (car player1) (car player2) 1) (ReproductionPlayers (cdr player1) (cdr player2))))))
 
+
+
+;; ########################################################
+;; Combination
+;; It takes attributes of two players and combines it 
+;; arguments:
+;; attribute1, attribute2 -> two attribute's players
+;; returns -> a list of binary
+;; ########################################################
 (define (Combination attribute1 attribute2 times)
   (cond
     ((zero? times)
      '())
     (else
-     ( cons (list (car attribute1) (car(cdr attribute1)) (car attribute2) (car(cdr attribute2))) (Combination attribute1 attribute2 (- times 1)) ))))
+     ( append (list (car attribute1) (car(cdr attribute1)) (car attribute2) (car(cdr attribute2))) (Combination attribute1 attribute2 (- times 1)) ))))
 
 
-(ReproductionPlayers '((1 0 1 1) (1 1 0 0) (1 1 1 0)) '((0 1 0 ) (1 0 0 0) (0 0 0 0)))
+;;(ReproductionPlayers '((1 0 1 1) (1 1 0 0) (1 1 1 0)) '((0 1 0 ) (1 0 0 0) (0 0 0 0)))
 
 ;; ########################################################
 ;; Mutation
@@ -293,7 +391,18 @@
   (else
    (cons (car attributes) (Player playerId (cdr attributes))))))
 
-
-(Selection (SortList (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))) 6)
+(Reproduction '(((10 (0 1 1 1) (1 1 1 1) (0 1 1 1))
+   (8 (1 1 1 0) (1 0 1 1) (1 1 0 0))
+   (7 (1 1 0 0) (1 1 0 1) (0 1 1 0))
+   (7 (1 1 1 1) (1 1 0 1) (0 0 0 0))
+   (7 (1 0 1 1) (1 1 1 0) (0 0 1 0))
+   (7 (1 0 1 1) (1 1 0 1) (0 1 0 0)))
+  ((9 (1 1 1 0) (1 0 1 1) (1 1 0 1))
+   (8 (0 1 1 1) (1 0 1 0) (1 1 1 0))
+   (8 (1 0 0 1) (1 1 1 1) (0 0 1 1))
+   (8 (1 1 0 1) (1 0 1 1) (0 0 1 1))
+   (6 (1 1 0 0) (1 1 0 0) (0 1 1 0))
+   (6 (1 0 0 0) (1 0 0 1) (0 1 1 1)))))
+;;(Selection (SortList (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))) 6)
 ;; (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))
 ;; (Fitness '((((1 1 1 1) (0 0 0 0) (1 0 1 0) 1) ( (1 1 1 0) (1 1 1 0) (1 1 1 0) 2)) (((0 0 0 0) (0 0 0 0) (0 0 0 0) 1 ) ((1 1 1 1) (1 1 1 1) (1 1 1 1) 2))))
