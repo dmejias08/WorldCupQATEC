@@ -159,6 +159,7 @@
 ;; ########################################################
 
 (define (Fitness population)
+  ;;REFRESH
   (cond
     ((null? population)
      '())
