@@ -1,5 +1,95 @@
 #lang racket
 
+;; ##### Auxiliar #####
+(define (len lista)
+  (cond(
+        (null? lista)
+        0)
+       (else
+        (+ 1 (len (cdr lista))))))
+
+
+;; ########################################################
+;; BinaryToInterger
+;; It converts binary to an interget 
+;; arguments:
+;; binary -> list of numbers that represents a binary number
+;; lenOfNumber -> len of binary list 
+;; return: an interger 
+;; ########################################################
+(define (BinaryToInterger binary lenOfNumber)
+  (cond
+    ((<= lenOfNumber 0)
+     0)
+    (else
+     ( + ( * (car binary) (expt 2 (- lenOfNumber 1))) (BinaryToInterger (cdr binary) (- lenOfNumber 1))))))
+
+
+(define (GetAttributes population team attribute)
+  (cond
+    ((equal? team 1)
+     (GetAttributesAux (car population) attribute))
+    (else
+     (GetAttributesAux (cadr population) attribute))))
+
+(define (GetAttributesAux team attribute)
+  (cond
+    ((null? team)
+     '())
+    ((equal? attribute "velocity")
+     (cons (GetPlayerAttribute (car team) 1 1) (GetAttributesAux (cdr team) attribute)))
+    ((equal? attribute "strength")
+     (cons (GetPlayerAttribute (car team) 2 1) (GetAttributesAux (cdr team) attribute)))
+    ((equal? attribute "ability")
+     (cons (GetPlayerAttribute (car team) 3 1) (GetAttributesAux (cdr team) attribute)))))
+
+(define (GetPlayerAttribute player attributePos cont)
+  (cond
+    ((> cont 3)
+     '())
+    ((equal? attributePos cont)
+      (BinaryToInterger (car player) (len (car player))))
+    (else
+     (GetPlayerAttribute (cdr player) attributePos (+ cont 1)))))
+
+(GetAttributes '((((0 1 0 1) (1 0 0 1) (1 1 0 0) 2)
+   ((1 1 0 1) (0 0 1 1) (0 1 1 0) 2)
+   ((0 1 0 1) (0 1 1 0) (1 1 0 0) 2)
+   ((1 0 0 0) (1 0 0 0) (1 0 0 0) 2)
+   ((0 1 0 0) (1 1 0 1) (0 1 1 1) 3)
+   ((0 1 1 1) (1 0 0 1) (1 1 0 0) 3)
+   ((1 1 1 0) (0 0 1 1) (0 1 1 1) 3)
+   ((0 1 0 0) (0 1 0 1) (1 1 1 0) 3)
+   ((0 1 0 0) (1 0 0 0) (0 0 1 1) 4)
+   ((0 0 1 0) (0 0 1 1) (1 1 0 0) 4)
+   ((0 0 0 1) (0 1 1 1) (0 0 1 0) 1))
+  (((1 0 0 0) (1 1 1 0) (1 0 1 1) 2)
+   ((1 0 1 0) (1 1 1 0) (1 0 1 0) 2)
+   ((0 1 1 0) (1 1 1 1) (1 0 1 0) 2)
+   ((1 0 0 1) (0 1 1 1) (1 0 1 0) 2)
+   ((1 0 1 0) (0 1 1 0) (1 0 1 0) 2)
+   ((1 0 0 1) (1 1 1 1) (1 1 1 0) 3)
+   ((0 0 1 0) (1 0 1 1) (1 1 1 0) 3)
+   ((0 1 1 0) (0 1 1 0) (0 0 0 1) 3)
+   ((1 0 1 1) (1 1 1 0) (1 1 0 1) 4)
+   ((1 1 1 0) (0 1 1 1) (1 0 1 1) 4)
+   ((0 0 0 0) (1 0 1 0) (0 1 1 0) 1))) 2 "strength")
+
+
+#|(GetAttributesAux '(((1 1 1 1) (1 1 1 0) (0 1 1 0) 2)
+   ((1 0 1 1) (0 0 1 0) (0 1 0 1) 2)
+   ((0 1 1 0) (1 0 0 1) (1 1 1 1) 2)
+   ((1 1 0 1) (1 1 0 0) (1 1 1 1) 2)
+   ((0 1 1 1) (1 0 1 1) (1 1 0 1) 3)
+   ((1 0 1 1) (0 1 1 0) (0 0 1 1) 3)
+   ((1 0 0 1) (0 0 1 1) (1 1 0 1) 3)
+   ((0 1 1 0) (1 0 0 1) (1 1 1 0) 3)
+   ((1 0 0 0) (1 1 1 0) (0 1 1 0) 4)
+   ((0 1 1 0) (1 0 0 1) (1 0 1 0) 4)
+   ((1 1 1 1) (1 1 1 1) (0 0 0 0) 1)) "velocity")
+|#
+
+;;(GetPlayerAttribute '( (1 0 1 0) (0 0 1 0) (0 1 1 1) 2) 3 1)
 ;; ########################################################
 ;; BinaryGenerator - auxiliar
 ;; It generate a list that represents a random binary number of 4 bits
@@ -19,8 +109,8 @@
 ;; it creates a list of attributes assign to each player
 ;; arguments:
 ;; numberOfAttributes -> the attributes each player is going to have
-;;    - normally 3 attributes (velocity, force, hability)
-;; return: list (velocity, force, hability)
+;;    - normally 3 attributes (velocity, strength, ability)
+;; return: list (velocity, strenght, ability)
 ;; ########################################################
 (define (CreatePlayersAttributes numberOfAttributes)
   (cond
@@ -36,7 +126,7 @@
 ;; arguments:
 ;; numberOfPlayers -> the attributes each player is going to have
 ;;    - normally 11 players 
-;; return: eleven lists of  (velocity, force, hability)
+;; return: eleven lists of  (velocity, strength, ability)
 ;; ########################################################
 (define (GenerateTeamsAttributes numberOfPlayers)
   (cond
@@ -152,12 +242,12 @@
 
 ;; ########################################################
 ;; Fitness
-;; It takes a random bit and exchange it to its contrary
+;; It takes a population a determines its fitness counting how many ones
+;; has in each attribute
 ;; arguments:
 ;; player -> a member of the population who will mutate
-;; return: ((velocity) (force) (hability))
+;; return: ((velocity) (strength) (ability))
 ;; ########################################################
-
 (define (Fitness population)
   (cond
     ((null? population)
@@ -165,12 +255,18 @@
     (else
      (cons (FitnessTeam (car population)) (Fitness (cdr population))))))
 
+
+
+
 (define (FitnessTeam team)
   (cond
     ((null? team)
      '())
     (else
      (cons (FitnessPlayer (car team) '()) (FitnessTeam (cdr team))))))
+
+
+
 
 (define (FitnessPlayer player resultPlayer)
   (cond
@@ -293,7 +389,7 @@
 ;; It takes a random bit and exchange it to its contrary
 ;; arguments:
 ;; player -> a member of the population who will mutate
-;; return: ((velocity) (force) (hability))
+;; return: ((velocity) (strength) (ability))
 ;; ########################################################
 (define (Mutation player)
   (cond
@@ -306,7 +402,7 @@
 ;; Mutation-Auxiliar
 ;; It looks a particular bit and change it 
 ;; arguments:
-;; attribute -> attribute of each player, velocity, force or hability
+;; attribute -> attribute of each player, velocity, strength or ability
 ;; mutationBit -> a number selected random
 ;; position ->  it starts from zero to keep count of position
 ;; flag -> a boolean to identify if position was found
@@ -382,7 +478,7 @@
 ;;     midFilders: 3
 ;;     forwards: 4
 ;; attributes -> attributes for each player
-;; return: ((velocity)(force)(hability) playerId)
+;; return: ((velocity)(strength)(ability) playerId)
 ;; ########################################################
 (define (Player playerId attributes)
   (cond
@@ -404,7 +500,7 @@
   ;;(6 (1 1 0 0) (1 1 0 0) (0 1 1 0)) 
   ;;(6 (1 0 0 0) (1 0 0 1) (0 1 1 1)))))
 
-(Population 2 4 4 2 5 3 2(Reproduction (Selection (SortList (Fitness(Population 2 4 4 2 5 3 2 (Reproduction (Selection (SortList (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))) 6))))) 6)))
+;;(Population 2 4 4 2 5 3 2(Reproduction (Selection (SortList (Fitness(Population 2 4 4 2 5 3 2 (Reproduction (Selection (SortList (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))) 6))))) 6)))
 ;;(Reproduction (Selection (SortList (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))) 6))
 ;;(Selection (SortList (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))) 6)
 ;; (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))
