@@ -51,7 +51,7 @@
       (BinaryToInterger (car player) (len (car player))))
     (else
      (GetPlayerAttribute (cdr player) attributePos (+ cont 1)))))
-
+#|
 (GetAttributes '((((0 1 0 1) (1 0 0 1) (1 1 0 0) 2)
    ((1 1 0 1) (0 0 1 1) (0 1 1 0) 2)
    ((0 1 0 1) (0 1 1 0) (1 1 0 0) 2)
@@ -74,7 +74,31 @@
    ((1 0 1 1) (1 1 1 0) (1 1 0 1) 4)
    ((1 1 1 0) (0 1 1 1) (1 0 1 1) 4)
    ((0 0 0 0) (1 0 1 0) (0 1 1 0) 1))) 2 "strength")
+|#
 
+(define (populationTry)
+  '((((0 1 0 1) (1 0 0 1) (1 1 0 0) 2)
+   ((1 1 0 1) (0 0 1 1) (0 1 1 0) 2)
+   ((0 1 0 1) (0 1 1 0) (1 1 0 0) 2)
+   ((1 0 0 0) (1 0 0 0) (1 0 0 0) 2)
+   ((0 1 0 0) (1 1 0 1) (0 1 1 1) 3)
+   ((0 1 1 1) (1 0 0 1) (1 1 0 0) 3)
+   ((1 1 1 0) (0 0 1 1) (0 1 1 1) 3)
+   ((0 1 0 0) (0 1 0 1) (1 1 1 0) 3)
+   ((0 1 0 0) (1 0 0 0) (0 0 1 1) 4)
+   ((0 0 1 0) (0 0 1 1) (1 1 0 0) 4)
+   ((0 0 0 1) (0 1 1 1) (0 0 1 0) 1))
+  (((1 0 0 0) (1 1 1 0) (1 0 1 1) 2)
+   ((1 0 1 0) (1 1 1 0) (1 0 1 0) 2)
+   ((0 1 1 0) (1 1 1 1) (1 0 1 0) 2)
+   ((1 0 0 1) (0 1 1 1) (1 0 1 0) 2)
+   ((1 0 1 0) (0 1 1 0) (1 0 1 0) 2)
+   ((1 0 0 1) (1 1 1 1) (1 1 1 0) 3)
+   ((0 0 1 0) (1 0 1 1) (1 1 1 0) 3)
+   ((0 1 1 0) (0 1 1 0) (0 0 0 1) 3)
+   ((1 0 1 1) (1 1 1 0) (1 1 0 1) 4)
+   ((1 1 1 0) (0 1 1 1) (1 0 1 1) 4)
+   ((0 0 0 0) (1 0 1 0) (0 1 1 0) 1))))
 
 #|(GetAttributesAux '(((1 1 1 1) (1 1 1 0) (0 1 1 0) 2)
    ((1 0 1 1) (0 0 1 0) (0 1 0 1) 2)
@@ -162,18 +186,23 @@
      (cons (GenerateTeamsAttributes 11) (GeneratePopulationAttributes (- teams 1))))))
 
 
-(define (Moving? team1 team2)
-        (cond
-          ((and (null? team1) (null? team2))
-           #t)
-          ((and (< (abs (- (caar team1) (caar team2))) 5)  (< (abs (- (cadar team1) (cadar team2) 5)))
-           (Moving? (cdr team1) (cdr team2))))
-          (else
-           #f)))
+(define (getPlayersIds population teamNumber)
+  (cond
+    ((equal? teamNumber 1)
+     (getPlayersIdsAux (car (population)) '()))
+    ((equal? teamNumber 2)
+    (getPlayersIdsAux (cadr  (population)) '()))))
+
+(define (getPlayersIdsAux team result)
+  (cond
+    ((equal? (len team) 1)
+     (cons (last (car team)) (reverse result)))
+    (else
+     (getPlayersIdsAux (cdr team) (cons (last (car team)) result)))))
 
 
-(Moving? '((1 2) (2 5)) '((3 4) (6 6)) )
-(Moving? '((1 2) (2 5)) '((10 4) (18 6)) )
+(getPlayersIds populationTry 1 )
+
 ;; ###########################
 ;; #### Genetic Algorithm ####
 ;; ###########################
