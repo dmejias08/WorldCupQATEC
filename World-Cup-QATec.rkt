@@ -90,6 +90,8 @@
 |#
 
 ;;(GetPlayerAttribute '( (1 0 1 0) (0 0 1 0) (0 1 1 1) 2) 3 1)
+
+
 ;; ########################################################
 ;; BinaryGenerator - auxiliar
 ;; It generate a list that represents a random binary number of 4 bits
@@ -103,6 +105,8 @@
     '())
   (else
     (cons (random 2) (BinaryGenerator (- numberBits 1))))))
+
+
 
 ;; ########################################################
 ;; CreatePlayersAttributes - auxiliar
@@ -119,6 +123,9 @@
     (else
      (cons (BinaryGenerator 4) (CreatePlayersAttributes (- numberOfAttributes 1))))))
 
+
+
+
 ;; ########################################################
 ;; GenerateTeamsAttributes - auxiliar
 ;; it creates a list that has lists of three attributes each, and 
@@ -134,6 +141,9 @@
        '())
     (else
      (cons (CreatePlayersAttributes 3) (GenerateTeamsAttributes (- numberOfPlayers 1))))))
+
+
+
 
 ;; ########################################################
 ;; GeneratePopulationAttributes - auxiliar
@@ -152,9 +162,22 @@
      (cons (GenerateTeamsAttributes 11) (GeneratePopulationAttributes (- teams 1))))))
 
 
+(define (Moving? team1 team2)
+        (cond
+          ((and (null? team1) (null? team2))
+           #t)
+          ((and (< (abs (- (caar team1) (caar team2))) 5)  (< (abs (- (cadar team1) (cadar team2) 5)))
+           (Moving? (cdr team1) (cdr team2))))
+          (else
+           #f)))
+
+
+(Moving? '((1 2) (2 5)) '((3 4) (6 6)) )
+(Moving? '((1 2) (2 5)) '((10 4) (18 6)) )
 ;; ###########################
 ;; #### Genetic Algorithm ####
 ;; ###########################
+
 
 
 ;; ########################################################
@@ -419,6 +442,8 @@
   (cons 1 (Mutation-aux attribute mutationBit position #t)))
   (else(cons (car attribute) (Mutation-aux (cdr attribute) mutationBit (+ position 1) flag)))))
 
+
+
 ;; ########################################################
 ;; Population
 ;; It creates the entire population based on team line up
@@ -442,6 +467,8 @@
     ((equal? teams 1)
     (cons (Team defenders2 midFilders2 forwards2 (car attributes)) (Population (- teams 1) defenders1 midFilders1 forwards1 defenders2 midFilders2 forwards2 (cdr attributes))))
     ))
+
+
 ;; ########################################################
 ;; Team
 ;; It creates an individual team with its line up
