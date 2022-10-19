@@ -1,0 +1,17 @@
+#lang racket
+
+
+
+(define (generationProcess population generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2)
+  (cond
+    ((equal? generation 20)
+     #f)
+    (else
+     (generationProcess2 (Fitness population) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2))))
+
+(define (generationProcess2 fitness generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2)
+  (cond
+    ((equal? generation 20)
+     #f)
+    (else
+     (generationProcess3 (SortList fitness) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2))))
