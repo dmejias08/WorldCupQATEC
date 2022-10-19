@@ -1,5 +1,6 @@
 #lang racket
 
+
 ;; ##### Auxiliar #####
 (define (len lista)
   (cond(
@@ -8,70 +9,6 @@
        (else
         (+ 1 (len (cdr lista))))))
 
-
-
-(define (GeneratePositions defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2)
-  (cond
-    ((and ( > (+ defenders1  midFielders1  forwards1) 11) ( > (+ defenders2 midFielders2 forwards2) 11))
-     #f)
-    ((and (zero? defenders1) (zero? midFielders1) (zero? forwards1) (zero? defenders2) (zero? midFielders2) (zero? forwards2))
-     '())
-    ((and (zero? defenders1) (zero? midFielders1) (zero? forwards1))
-     (cons (cons (list 1105 340) (GeneratePosAuxTeam2 defenders2 midFielders2 forwards2)) (GeneratePositions  defenders1 midFielders1 forwards1 0 0 0) ))
-    (else
-     (cons (cons (list 70 340) (GeneratePosAuxTeam1 defenders1 midFielders1 forwards1)) (GeneratePositions 0 0 0  defenders2 midFielders2 forwards2) ))))
-
-(define (GeneratePosAuxTeam1 defenders1 midFielders1 forwards1)
-  (cond
-    ((and (zero? defenders1) (zero? midFielders1) (zero? forwards1))
-     '())
-    ((not (zero? defenders1))
-     (append (GeneratePosAuxDef1Mid2 150 defenders1 0) (GeneratePosAuxTeam1 0 midFielders1 forwards1)))
-    ((not (zero? midFielders1))
-     (append (GeneratePosAuxDef2Mid1 400 midFielders1 0) (GeneratePosAuxTeam1 defenders1 0 forwards1)))
-    ((not (zero? forwards1))
-     (append (GeneratePosAuxForwards 500 forwards1 0) (GeneratePosAuxTeam1 defenders1 midFielders1 0)))
-  ))
-
-(define (GeneratePosAuxTeam2 defenders2 midFielders2 forwards2)
-  (cond
-    ((and (zero? defenders2) (zero? midFielders2) (zero? forwards2))
-     '())
-    ((not (zero? defenders2))
-     (append (GeneratePosAuxDef2Mid1 1025 defenders2 0) (GeneratePosAuxTeam2 0 midFielders2 forwards2)))
-    ((not (zero? midFielders2))
-     (append (GeneratePosAuxDef1Mid2 775 midFielders2 0) (GeneratePosAuxTeam2 defenders2 0 forwards2)))
-    ((not (zero? forwards2))
-     (append (GeneratePosAuxForwards 675 forwards2 0) (GeneratePosAuxTeam2 defenders2 midFielders2 0)))
-  ))
-    
-(define (GeneratePosAuxDef1Mid2 initialPosition player counter)
-  (cond
-    ((equal? player counter)
-     '())
-    ((or (zero? counter) (equal? player (+ counter 1)))
-     (cons (list initialPosition (+ 100 ( * ( / 500 ( - player 1)) counter))) (GeneratePosAuxDef1Mid2 initialPosition player (+ counter 1))))
-    (else
-     (cons (list (+ initialPosition 50) ( + 100 ( * (/ 500 (- player 1)) counter))) (GeneratePosAuxDef1Mid2 initialPosition player (+ counter 1))))))
-
-(define (GeneratePosAuxDef2Mid1 initialPosition player counter)
-  (cond
-    ((equal? player counter)
-     '())
-    ((or (zero? counter) (equal?  player (+ counter 1)))
-     (cons (list initialPosition (+ 100 (* (/ 500 (- player 1)) counter))) (GeneratePosAuxDef2Mid1 initialPosition player (+ counter 1))))
-    (else
-     (cons (list (- initialPosition 50) (+ 100 (* (/ 500 (- player 1) ) counter))) (GeneratePosAuxDef2Mid1 initialPosition player (+ counter 1))))))
-
-(define (GeneratePosAuxForwards initialPosition player counter)
-  (cond
-    ((> counter player)
-     '())
-    (else
-     (cons (list initialPosition (+ 100 (* (/ 500 (- player 1)) counter))) (GeneratePosAuxDef2Mid1 initialPosition player (+ counter 1))))))
-
-
-(GeneratePositions 3 5 2 4 4 2)
 ;; ########################################################
 ;; BinaryToInterger
 ;; It converts binary to an interget 
@@ -88,95 +25,7 @@
      ( + ( * (car binary) (expt 2 (- lenOfNumber 1))) (BinaryToInterger (cdr binary) (- lenOfNumber 1))))))
 
 
-(define (GetAttributes population team attribute)
-  (cond
-    ((equal? team 1)
-     (GetAttributesAux (car population) attribute))
-    (else
-     (GetAttributesAux (cadr population) attribute))))
 
-(define (GetAttributesAux team attribute)
-  (cond
-    ((null? team)
-     '())
-    ((equal? attribute "velocity")
-     (cons (GetPlayerAttribute (car team) 1 1) (GetAttributesAux (cdr team) attribute)))
-    ((equal? attribute "strength")
-     (cons (GetPlayerAttribute (car team) 2 1) (GetAttributesAux (cdr team) attribute)))
-    ((equal? attribute "ability")
-     (cons (GetPlayerAttribute (car team) 3 1) (GetAttributesAux (cdr team) attribute)))))
-
-(define (GetPlayerAttribute player attributePos cont)
-  (cond
-    ((> cont 3)
-     '())
-    ((equal? attributePos cont)
-      (BinaryToInterger (car player) (len (car player))))
-    (else
-     (GetPlayerAttribute (cdr player) attributePos (+ cont 1)))))
-#|
-(GetAttributes '((((0 1 0 1) (1 0 0 1) (1 1 0 0) 2)
-   ((1 1 0 1) (0 0 1 1) (0 1 1 0) 2)
-   ((0 1 0 1) (0 1 1 0) (1 1 0 0) 2)
-   ((1 0 0 0) (1 0 0 0) (1 0 0 0) 2)
-   ((0 1 0 0) (1 1 0 1) (0 1 1 1) 3)
-   ((0 1 1 1) (1 0 0 1) (1 1 0 0) 3)
-   ((1 1 1 0) (0 0 1 1) (0 1 1 1) 3)
-   ((0 1 0 0) (0 1 0 1) (1 1 1 0) 3)
-   ((0 1 0 0) (1 0 0 0) (0 0 1 1) 4)
-   ((0 0 1 0) (0 0 1 1) (1 1 0 0) 4)
-   ((0 0 0 1) (0 1 1 1) (0 0 1 0) 1))
-  (((1 0 0 0) (1 1 1 0) (1 0 1 1) 2)
-   ((1 0 1 0) (1 1 1 0) (1 0 1 0) 2)
-   ((0 1 1 0) (1 1 1 1) (1 0 1 0) 2)
-   ((1 0 0 1) (0 1 1 1) (1 0 1 0) 2)
-   ((1 0 1 0) (0 1 1 0) (1 0 1 0) 2)
-   ((1 0 0 1) (1 1 1 1) (1 1 1 0) 3)
-   ((0 0 1 0) (1 0 1 1) (1 1 1 0) 3)
-   ((0 1 1 0) (0 1 1 0) (0 0 0 1) 3)
-   ((1 0 1 1) (1 1 1 0) (1 1 0 1) 4)
-   ((1 1 1 0) (0 1 1 1) (1 0 1 1) 4)
-   ((0 0 0 0) (1 0 1 0) (0 1 1 0) 1))) 2 "strength")
-|#
-
-(define (populationTry)
-  '((((0 1 0 1) (1 0 0 1) (1 1 0 0) 2)
-   ((1 1 0 1) (0 0 1 1) (0 1 1 0) 2)
-   ((0 1 0 1) (0 1 1 0) (1 1 0 0) 2)
-   ((1 0 0 0) (1 0 0 0) (1 0 0 0) 2)
-   ((0 1 0 0) (1 1 0 1) (0 1 1 1) 3)
-   ((0 1 1 1) (1 0 0 1) (1 1 0 0) 3)
-   ((1 1 1 0) (0 0 1 1) (0 1 1 1) 3)
-   ((0 1 0 0) (0 1 0 1) (1 1 1 0) 3)
-   ((0 1 0 0) (1 0 0 0) (0 0 1 1) 4)
-   ((0 0 1 0) (0 0 1 1) (1 1 0 0) 4)
-   ((0 0 0 1) (0 1 1 1) (0 0 1 0) 1))
-  (((1 0 0 0) (1 1 1 0) (1 0 1 1) 2)
-   ((1 0 1 0) (1 1 1 0) (1 0 1 0) 2)
-   ((0 1 1 0) (1 1 1 1) (1 0 1 0) 2)
-   ((1 0 0 1) (0 1 1 1) (1 0 1 0) 2)
-   ((1 0 1 0) (0 1 1 0) (1 0 1 0) 2)
-   ((1 0 0 1) (1 1 1 1) (1 1 1 0) 3)
-   ((0 0 1 0) (1 0 1 1) (1 1 1 0) 3)
-   ((0 1 1 0) (0 1 1 0) (0 0 0 1) 3)
-   ((1 0 1 1) (1 1 1 0) (1 1 0 1) 4)
-   ((1 1 1 0) (0 1 1 1) (1 0 1 1) 4)
-   ((0 0 0 0) (1 0 1 0) (0 1 1 0) 1))))
-
-#|(GetAttributesAux '(((1 1 1 1) (1 1 1 0) (0 1 1 0) 2)
-   ((1 0 1 1) (0 0 1 0) (0 1 0 1) 2)
-   ((0 1 1 0) (1 0 0 1) (1 1 1 1) 2)
-   ((1 1 0 1) (1 1 0 0) (1 1 1 1) 2)
-   ((0 1 1 1) (1 0 1 1) (1 1 0 1) 3)
-   ((1 0 1 1) (0 1 1 0) (0 0 1 1) 3)
-   ((1 0 0 1) (0 0 1 1) (1 1 0 1) 3)
-   ((0 1 1 0) (1 0 0 1) (1 1 1 0) 3)
-   ((1 0 0 0) (1 1 1 0) (0 1 1 0) 4)
-   ((0 1 1 0) (1 0 0 1) (1 0 1 0) 4)
-   ((1 1 1 1) (1 1 1 1) (0 0 0 0) 1)) "velocity")
-|#
-
-;;(GetPlayerAttribute '( (1 0 1 0) (0 0 1 0) (0 1 1 1) 2) 3 1)
 
 
 ;; ########################################################
@@ -247,29 +96,6 @@
      '())
     (else
      (cons (GenerateTeamsAttributes 11) (GeneratePopulationAttributes (- teams 1))))))
-
-
-(define (getPlayersIds population teamNumber)
-  (cond
-    ((equal? teamNumber 1)
-     (getPlayersIdsAux (car (population)) '()))
-    ((equal? teamNumber 2)
-    (getPlayersIdsAux (cadr  (population)) '()))))
-
-(define (getPlayersIdsAux team result)
-  (cond
-    ((equal? (len team) 1)
-     (cons (last (car team)) (reverse result)))
-    (else
-     (getPlayersIdsAux (cdr team) (cons (last (car team)) result)))))
-
-
-(getPlayersIds populationTry 1 )
-
-;; ###########################
-;; #### Genetic Algorithm ####
-;; ###########################
-
 
 
 ;; ########################################################
@@ -364,7 +190,6 @@
 ;; return: ((velocity) (strength) (ability))
 ;; ########################################################
 (define (Fitness population)
-  ;;REFRESH
   (cond
     ((null? population)
      '())
@@ -447,7 +272,7 @@
 
 ;; ########################################################
 ;; Reproduction Teams
-;; It creates the final team with the beset 6 players and then reproduce it
+;; It creates the final team with the best 6 players and then reproduce it
 ;; arguments:
 ;; team -> initial team to iterate over it
 ;; teamCopy -> a copy of the selected players
@@ -465,7 +290,7 @@
     ((null? team)
      '())
     (else
-     (cons (Mutation (cdr (car team))) (ReproductionTeamsAux (cdr team))))))
+     (cons (cdr (car team)) (ReproductionTeamsAux (cdr team))))))
 
 ;; ########################################################
 ;; Reproduction Players
@@ -498,7 +323,7 @@
      ( append (list (car attribute1) (car(cdr attribute1)) (car attribute2) (car(cdr attribute2))) (Combination attribute1 attribute2 (- times 1)) ))))
 
 
-;;(ReproductionPlayers '((1 0 1 1) (1 1 0 0) (1 1 1 0)) '((0 1 0 ) (1 0 0 0) (0 0 0 0)))
+(ReproductionPlayers '((1 0 1 1) (1 1 0 0) (1 1 1 0)) '((0 1 0 1) (1 0 0 0) (0 0 0 0)))
 
 ;; ########################################################
 ;; Mutation
@@ -607,38 +432,76 @@
   (else
    (cons (car attributes) (Player playerId (cdr attributes))))))
 
-;;(Reproduction '(((10 (0 1 1 1) (1 1 1 1) (0 1 1 1))
-  ;; (8 (1 1 1 0) (1 0 1 1) (1 1 0 0))
-  ;;(7 (1 1 0 0) (1 1 0 1) (0 1 1 0))
-  ;;(7 (1 1 1 1) (1 1 0 1) (0 0 0 0))
-  ;;(7 (1 0 1 1) (1 1 1 0) (0 0 1 0))
-  ;;(7 (1 0 1 1) (1 1 0 1) (0 1 0 0)))
-  ;;((9 (1 1 1 0) (1 0 1 1) (1 1 0 1))
-  ;;(8 (0 1 1 1) (1 0 1 0) (1 1 1 0))
-  ;;(8 (1 0 0 1) (1 1 1 1) (0 0 1 1))
-  ;;(8 (1 1 0 1) (1 0 1 1) (0 0 1 1))
-  ;;(6 (1 1 0 0) (1 1 0 0) (0 1 1 0)) 
-  ;;(6 (1 0 0 0) (1 0 0 1) (0 1 1 1)))))
-
 
 (define (generationProcess population generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2)
   (cond
-    ((equal? generation 20)
-     #f)
+    ((equal? generation 0)
+     population)
     (else
+     (displayln "population")
+     (displayln population)
      (generationProcess2 (Fitness population) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2))))
 
 (define (generationProcess2 fitness generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2)
   (cond
-    ((equal? generation 20)
+    ((equal? generation 0)
      #f)
     (else
+     (displayln "fitness")
+     (displayln fitness)
      (generationProcess3 (SortList fitness) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2))))
 
+(define (generationProcess3 sortedList generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2)
+  (cond
+    ((equal? generation 0)
+      #f)
+    (else
+     (displayln "sort")
+     (displayln sortedList)
+     (generationProcess4 (Selection sortedList 6) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 ))))
 
-(Population 2 4 4 2 5 3 2 (Reproduction (Selection (SortList (Fitness(Population 2 4 4 2 5 3 2 (Reproduction (Selection (SortList (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))) 6))))) 6)))
-;;(Reproduction (Selection (SortList (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))) 6))
-;;(Selection (SortList (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))) 6)
-;; (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))
-;; (Fitness '((((1 1 1 1) (0 0 0 0) (1 0 1 0) 1) ( (1 1 1 0) (1 1 1 0) (1 1 1 0) 2)) (((0 0 0 0) (0 0 0 0) (0 0 0 0) 1 ) ((1 1 1 1) (1 1 1 1) (1 1 1 1) 2))))
-;;(Population 2 4 4 2 5 3 2 (Reproduction (Selection (SortList (Fitness (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)))) 6)))
+(define (generationProcess4 selectedPlayers generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2)
+    (cond
+    ((equal? generation 0)
+      #f)
+    (else
+     (displayln "selection")
+     (displayln selectedPlayers)
+     (generationProcess5 (Reproduction selectedPlayers) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2))))
+
+(define (generationProcess5 childs generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2)
+    (cond
+    ((equal? generation 0)
+      #f)
+    (else
+     (displayln "childs")
+     (displayln childs)
+     (generationProcess (Population team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 childs)
+                        (- generation 1) team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2))))
+
+
+;;(Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2))
+
+(generationProcess '((((1 1 1 0) (1 0 1 0) (1 0 1 1) 2)
+   ((1 1 0 1) (0 1 1 1) (1 1 1 1) 2)
+   ((1 1 0 1) (1 0 1 0) (0 1 0 0) 2)
+   ((1 1 0 0) (0 0 0 1) (0 0 0 0) 2)
+   ((0 1 1 1) (0 1 1 0) (0 0 1 1) 3)
+   ((1 1 1 0) (1 0 0 0) (0 0 0 1) 3)
+   ((0 1 0 1) (1 0 1 0) (0 1 0 0) 3)
+   ((0 0 1 1) (0 0 0 0) (1 1 0 0) 3)
+   ((1 0 1 1) (1 1 1 0) (1 1 0 1) 4)
+   ((1 0 0 0) (1 0 1 1) (1 1 0 0) 4)
+   ((0 0 0 1) (0 1 1 1) (1 0 1 1) 1))
+  (((0 1 1 1) (1 0 1 1) (1 1 0 1) 2)
+   ((0 1 1 0) (0 1 0 1) (0 0 1 1) 2)
+   ((0 0 1 1) (0 1 0 1) (1 0 1 0) 2)
+   ((1 0 0 1) (1 0 1 0) (1 0 1 1) 2)
+   ((0 1 1 1) (0 1 0 0) (1 1 0 1) 2)
+   ((0 0 1 1) (1 0 1 0) (0 0 1 1) 3)
+   ((0 0 1 1) (0 0 0 0) (1 1 0 1) 3)
+   ((0 1 0 0) (0 1 0 1) (0 0 0 1) 3)
+   ((0 1 1 1) (1 1 0 0) (0 1 1 0) 4)
+   ((1 1 1 0) (0 0 1 1) (0 1 0 1) 4)
+   ((1 0 1 0) (1 1 0 1) (0 1 1 0) 1))) 20 2 4 4 2 5 3 2)
+
