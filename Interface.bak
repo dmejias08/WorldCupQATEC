@@ -1,4 +1,5 @@
 #lang racket
+
 (require (lib "graphics.ss" "graphics"))
 (require plot racket/class racket/gui/base)
 (require 2htdp/universe)
@@ -214,8 +215,8 @@
          (list static_list1 static_list2)))
   )
 
-(define (starting_pos)
-  (GeneratePositions 5 4 1 4 4 2)
+(define (starting_pos d1 c1 s1 d2 c2 s2)
+  (GeneratePositions d1 c1 s1 d2 c2 s2)
   )
 
 
@@ -248,36 +249,36 @@
    (list 0 0))
    )
 
-(define (CallToUpdate positions ball_position)
+(define (CallToUpdate positions ball_position population)
   (reverse (UpdatePositions
            (FollowBall ball_position)
            (cadr positions)
            (FollowBall ball_position)
            (car positions)
-           '(15 14 13 11 8 7 2 7 8 10 15)
-           '(12 13 11 7 5 4 2 1 1 15 15)
-           '(15 14 15 11 10 7 2 7 8 10 15)
-           '(11 14 15 11 10 8 2 3 5 10 15)
-           '(1 2 2 2 2 3 3 3 3 4 4)
-           '(1 2 2 2 2 2 3 3 3 3 4)
+           (GetAttributes population 1 "velocity")
+           (GetAttributes population 1 "ability")
+           (GetAttributes population 2 "velocity")
+           (GetAttributes population 2 "ability")
+           (GetPlayersIds population 1)
+           (GetPlayersIds population 2)
            ))
   )
 
-(define (ActiveMovingAux positions ball_position)
+(define (ActiveMovingAux positions ball_position population)
   (RepaintAll  positions ball_position)
-  (cond((not(equal? positions (CallToUpdate positions ball_position)))
-        (ActiveMovingAux (CallToUpdate positions ball_position) (ball_pos (car positions) (cadr positions) ball_position 20 20))
+  (cond((not(equal? positions (CallToUpdate positions ball_position population)))
+        (ActiveMovingAux (CallToUpdate positions ball_position population) (ball_pos (car positions) (cadr positions) ball_position 20 20) population )
         )
        (else
         positions
         ))
   )
 
-(define (ActiveMoving positions)
-  (ActiveMovingAux positions  (ball_pos (car positions) (cadr positions) '(690 340) 10 10))
+(define (ActiveMoving positions population)
+  (ActiveMovingAux positions  (ball_pos (car positions) (cadr positions) '(690 340) 10 10) population)
   )
 
-(ActiveMoving (starting_pos))
+;;Meter en generation2
 
 #|(CallToUpdate(CallToUpdate (UpdatePositions
            (car (starting_pos))

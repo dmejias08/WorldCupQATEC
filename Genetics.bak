@@ -1,5 +1,5 @@
 #lang racket
-
+(require "Interface.rkt")
 
 ;; ##### Auxiliar #####
 (define (len lista)
@@ -413,6 +413,47 @@
     )
     ))
 
+(define (GetPlayersIds population teamNumber)
+  (cond
+    ((equal? teamNumber 1)
+     (GetPlayersIdsAux (car (population)) '()))
+    ((equal? teamNumber 2)
+    (GetPlayersIdsAux (cadr  (population)) '()))))
+
+(define (GetPlayersIdsAux team result)
+  (cond
+    ((equal? (len team) 1)
+     (cons (last (car team)) (reverse result)))
+    (else
+     (GetPlayersIdsAux (cdr team) (cons (last (car team)) result)))))
+
+(define (GetAttributes population team attribute)
+  (cond
+    ((equal? team 1)
+     (GetAttributesAux (car population) attribute))
+    (else
+     (GetAttributesAux (cadr population) attribute))))
+
+(define (GetAttributesAux team attribute)
+  (cond
+    ((null? team)
+     '())
+    ((equal? attribute "velocity")
+     (cons (GetPlayerAttribute (car team) 1 1) (GetAttributesAux (cdr team) attribute)))
+    ((equal? attribute "strength")
+     (cons (GetPlayerAttribute (car team) 2 1) (GetAttributesAux (cdr team) attribute)))
+    ((equal? attribute "ability")
+     (cons (GetPlayerAttribute (car team) 3 1) (GetAttributesAux (cdr team) attribute)))))
+
+(define (GetPlayerAttribute player attributePos cont)
+  (cond
+    ((> cont 3)
+     '())
+    ((equal? attributePos cont)
+      (BinaryToInterger (car player) (len (car player))))
+    (else
+     (GetPlayerAttribute (cdr player) attributePos (+ cont 1)))))
+
 ;; ########################################################
 ;; Player
 ;; It created a player with its attributes 
@@ -434,6 +475,7 @@
 
 
 (define (generationProcess population generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2)
+  (ActiveMoving (starting_pos defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2) population)
   (cond
     ((equal? generation 0)
      population)
@@ -482,26 +524,5 @@
 
 ;;(Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2))
 
-(generationProcess '((((1 1 1 0) (1 0 1 0) (1 0 1 1) 2)
-   ((1 1 0 1) (0 1 1 1) (1 1 1 1) 2)
-   ((1 1 0 1) (1 0 1 0) (0 1 0 0) 2)
-   ((1 1 0 0) (0 0 0 1) (0 0 0 0) 2)
-   ((0 1 1 1) (0 1 1 0) (0 0 1 1) 3)
-   ((1 1 1 0) (1 0 0 0) (0 0 0 1) 3)
-   ((0 1 0 1) (1 0 1 0) (0 1 0 0) 3)
-   ((0 0 1 1) (0 0 0 0) (1 1 0 0) 3)
-   ((1 0 1 1) (1 1 1 0) (1 1 0 1) 4)
-   ((1 0 0 0) (1 0 1 1) (1 1 0 0) 4)
-   ((0 0 0 1) (0 1 1 1) (1 0 1 1) 1))
-  (((0 1 1 1) (1 0 1 1) (1 1 0 1) 2)
-   ((0 1 1 0) (0 1 0 1) (0 0 1 1) 2)
-   ((0 0 1 1) (0 1 0 1) (1 0 1 0) 2)
-   ((1 0 0 1) (1 0 1 0) (1 0 1 1) 2)
-   ((0 1 1 1) (0 1 0 0) (1 1 0 1) 2)
-   ((0 0 1 1) (1 0 1 0) (0 0 1 1) 3)
-   ((0 0 1 1) (0 0 0 0) (1 1 0 1) 3)
-   ((0 1 0 0) (0 1 0 1) (0 0 0 1) 3)
-   ((0 1 1 1) (1 1 0 0) (0 1 1 0) 4)
-   ((1 1 1 0) (0 0 1 1) (0 1 0 1) 4)
-   ((1 0 1 0) (1 1 0 1) (0 1 1 0) 1))) 20 2 4 4 2 5 3 2)
+(generationProcess (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)) 1 2 4 4 2 5 3 2)
 
