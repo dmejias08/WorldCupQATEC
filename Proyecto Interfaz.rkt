@@ -20,7 +20,7 @@
   ((draw-solid-ellipse mainWindow) (make-posn (car position) (last position)) 20 20 "white"))
 
 (define (Refresh team1 team2 ball score)
-  ((draw-pixmap mainWindow) "assets/futcourt.png" (make-posn 0 0))
+  ((draw-pixmap mainWindow) "assets/futcourt.png" (make-posn 0 0)) 
   (Jugadores team1 "blue" 1)
   (Jugadores team2 "red" 12)
   (Ball ball)
@@ -48,9 +48,9 @@
 
 (define (Collisions positions pair)
   (cond ((null? positions)
-         #t)
-        ((and (< (abs (- (caar positions)(car pair))) 5 ) (< (abs (- (cadar positions)(cadr pair))) 5 ))
          #f)
+        ((and (< (abs (- (caar positions)(car pair))) 10 ) (< (abs (- (cadar positions)(cadr pair))) 10 ))
+         #t)
         (else
          (Collisions (cdr positions) pair))))
 
@@ -63,8 +63,68 @@
         (else
          (FollowBallAux pair (cons pair list)(+ counter 1)))))
 
-(define (CallMovingFactor x1 y1 x2 y2 v h ID type team positions1 positions2)
-  (cond ((or (> (-(abs (- x2 x1))7) 10) (> (-(abs (- y2 y1))7) 10))
+(define (GeneratePositions defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2)
+  (cond
+    ((and ( > (+ defenders1  midFielders1  forwards1) 11) ( > (+ defenders2 midFielders2 forwards2) 11))
+     #f)
+    ((and (zero? defenders1) (zero? midFielders1) (zero? forwards1) (zero? defenders2) (zero? midFielders2) (zero? forwards2))
+     '())
+    ((and (zero? defenders1) (zero? midFielders1) (zero? forwards1))
+     (cons (cons (list 1105 340) (GeneratePosAuxTeam2 defenders2 midFielders2 forwards2)) (GeneratePositions  defenders1 midFielders1 forwards1 0 0 0) ))
+    (else
+     (cons (cons (list 70 340) (GeneratePosAuxTeam1 defenders1 midFielders1 forwards1)) (GeneratePositions 0 0 0  defenders2 midFielders2 forwards2) ))))
+
+(define (GeneratePosAuxTeam1 defenders1 midFielders1 forwards1)
+  (cond
+    ((and (zero? defenders1) (zero? midFielders1) (zero? forwards1))
+     '())
+    ((not (zero? defenders1))
+     (append (GeneratePosAuxDef1Mid2 150 defenders1 0) (GeneratePosAuxTeam1 0 midFielders1 forwards1)))
+    ((not (zero? midFielders1))
+     (append (GeneratePosAuxDef2Mid1 400 midFielders1 0) (GeneratePosAuxTeam1 defenders1 0 forwards1)))
+    ((not (zero? forwards1))
+     (append (GeneratePosAuxForwards 500 forwards1 0) (GeneratePosAuxTeam1 defenders1 midFielders1 0)))
+  ))
+
+(define (GeneratePosAuxTeam2 defenders2 midFielders2 forwards2)
+  (cond
+    ((and (zero? defenders2) (zero? midFielders2) (zero? forwards2))
+     '())
+    ((not (zero? defenders2))
+     (append (GeneratePosAuxDef2Mid1 1025 defenders2 0) (GeneratePosAuxTeam2 0 midFielders2 forwards2)))
+    ((not (zero? midFielders2))
+     (append (GeneratePosAuxDef1Mid2 775 midFielders2 0) (GeneratePosAuxTeam2 defenders2 0 forwards2)))
+    ((not (zero? forwards2))
+     (append (GeneratePosAuxForwards 675 forwards2 0) (GeneratePosAuxTeam2 defenders2 midFielders2 0)))
+  ))
+    
+(define (GeneratePosAuxDef1Mid2 initialPosition player counter)
+  (cond
+    ((equal? player counter)
+     '())
+    ((or (zero? counter) (equal? player (+ counter 1)))
+     (cons (list initialPosition (+ 150 ( * ( / 500 player) counter))) (GeneratePosAuxDef1Mid2 initialPosition player (+ counter 1))))
+    (else
+     (cons (list (+ initialPosition 50) ( + 150 ( * (/ 500 player) counter))) (GeneratePosAuxDef1Mid2 initialPosition player (+ counter 1))))))
+
+(define (GeneratePosAuxDef2Mid1 initialPosition player counter)
+  (cond
+    ((equal? player counter)
+     '())
+    ((or (zero? counter) (equal?  player (+ counter 1)))
+     (cons (list initialPosition (+ 150 (* (/ 500 player) counter))) (GeneratePosAuxDef2Mid1 initialPosition player (+ counter 1))))
+    (else
+     (cons (list (- initialPosition 50) (+ 150 (* (/ 500 player) counter))) (GeneratePosAuxDef2Mid1 initialPosition player (+ counter 1))))))
+
+(define (GeneratePosAuxForwards initialPosition player counter)
+  (cond
+    ((> counter player)
+     '())
+    (else
+     (cons (list initialPosition (+ 275 (* (/ 200 player) counter))) (GeneratePosAuxDef2Mid1 initialPosition player (+ counter 1))))))
+
+(define (CallMovingFactor x1 y1 x2 y2 v h ID type team)
+  (cond ((or (> (-(abs (- x2 x1))5) 5) (> (-(abs (- y2 y1))5) 5))
          (cond ((and (< x2 1180) (> x2 20) (< y2 680) (> y2 20))
                 (cond ((or
                         (and (equal? ID 1) (and(or (< x2 200) (> x2 975))(and (< y2 500) (> y2 175))))
@@ -74,7 +134,7 @@
                         (and (equal? ID 4) (and (> x2 400) (< x2 1100)) (equal? team 2))
                         (and (equal? ID 4) (and (> x2 100) (< x2 800))  (equal? team 1))
                         )
-                       (DeltaXY x1 y1 x2 y2 v h ID type team positions1 positions2)
+                       (DeltaXY x1 y1 x2 y2 v h ID type team)
                        )
                       (else 0)))
                (else 0))
@@ -82,21 +142,11 @@
         (else 0)
         )
   )
-(define (DeltaXY x1 y1 x2 y2 v h ID type team positions1 positions2)
+(define (DeltaXY x1 y1 x2 y2 v h ID type team)
   (cond ((or(equal? type "x"))
-         (cond ((and (Collisions positions1 (list (+ x2 (MovingFactor x1 y1 x2 y2 v h)) y2)) (Collisions positions2 (list (+ x2 (MovingFactor x1 y1 x2 y2 v h)) y2)))
-                (MovingFactor x1 y1 x2 y2 v h))
-               (else
-                (* -1 (MovingFactor x1 y1 x2 y2 v h))
-                )
-               ))
+         (MovingFactor x1 y1 x2 y2 v h))
         (else
-         (cond ((and (Collisions positions1 (list x2 (+ y2 (MovingFactor y1 x1 y2 x2 v h)))) (Collisions positions2 (list x2 (+ y2 (MovingFactor y1 x1 y2 x2 v h)))))
-                (MovingFactor y1 x1 y2 x2 v h))
-               (else
-                (* -1 (MovingFactor y1 x1 y2 x2 v h))
-                )
-               )
+         (MovingFactor y1 x1 y2 x2 v h)
          ))
   )
 
@@ -104,7 +154,7 @@
   (* 0.25 (sqrt (+ (expt (+ v 5) 2) (expt (+ h 5) 2))) (/ (- x2 x1) (sqrt(+ (expt (- x2 x1) 2) (expt (- y2 y1) 2)))))
   )
 
-(define (ModifyPosition static_list changing_list list_compare counter velocity ability ID team other_team)
+(define (ModifyPosition static_list changing_list list_compare counter velocity ability ID team)
   (cond ((not(null? static_list))
          (ModifyList static_list counter (list (- (caar list_compare) (CallMovingFactor
                                                                        (caar changing_list)
@@ -115,9 +165,7 @@
                                                                        (car ability)
                                                                        (car ID)
                                                                        "x"
-                                                                       team
-                                                                       static_list
-                                                                       other_team)
+                                                                       team)
                                                   )
                                                (- (last(car list_compare)) (CallMovingFactor
                                                                             (caar changing_list)
@@ -128,9 +176,7 @@
                                                                             (car ability)
                                                                             (car ID)
                                                                             "y"
-                                                                            team
-                                                                            static_list
-                                                                            other_team)
+                                                                            team)
                                                   )
                                                )))
         
@@ -149,10 +195,10 @@
    
   (cond ((not (null? changing_list1))
          (UpdatePositionsAux
-          (ModifyPosition static_list1 changing_list1 list_compare1 counter1 velocity1 ability1 ID1 1 static_list2)
+          (ModifyPosition static_list1 changing_list1 list_compare1 counter1 velocity1 ability1 ID1 1)
           (cdr changing_list1)
           (cdr list_compare1)
-          (ModifyPosition static_list2 changing_list2 list_compare2 counter2 velocity2 ability2 ID2 2 static_list1)
+          (ModifyPosition static_list2 changing_list2 list_compare2 counter2 velocity2 ability2 ID2 2)
           (cdr changing_list2)
           (cdr list_compare2)
           (cdr velocity1)
@@ -169,97 +215,67 @@
   )
 
 (define (starting_pos)
-  (list (list
-         (list 70 340)
-         (list 150 600)
-         (list 200 450)
-         (list 200 250)
-         (list 150 100)
-         (list 400 600)
-         (list 350 450)
-         (list 350 250)
-         (list 400 100)
-         (list 500 450)
-         (list 500 250))
-
-        (list
-         (list 1105 340)
-         (list 1025 600)
-         (list 975 450)
-         (list 975 250)
-         (list 1025 100)
-         (list 775 600)
-         (list 825 450)
-         (list 825 250)
-         (list 775 100)
-         (list 675 450)
-         (list 675 250))
-        )
+  (GeneratePositions 5 4 1 4 4 2)
   )
 
-(define (togo_pos)
-  (list
-   (FollowBall (ball_pos))
-   (FollowBall (ball_pos))
-   )
+
+(define (ball_pos team1 team2 last_pos f h)
+  (cond ((Collisions team2 last_pos)
+         (list (- (car last_pos) (MovingFactor 1105 340 (car last_pos) (cadr last_pos) f h))
+               (- (cadr last_pos) (MovingFactor 340 1105 (cadr last_pos) (car last_pos) f h))))
+        ((Collisions team1 last_pos)
+         (list (- (car last_pos) (MovingFactor 70 340 (car last_pos) (cadr last_pos) f h))
+               (- (cadr last_pos) (MovingFactor 340 70 (cadr last_pos) (car last_pos) f h))))
+        (else
+         (RandomMove last_pos (+ 100 (random 1000)) (+ 100 (random 500)) (+ 100 f) (+ 100 h))
+         )
+  ))
+
+(define (ContinuosMovement team last_pos f h)
+  (cond ((Collisions team last_pos)
+         ))
   )
 
-(define (ball_pos)
-  (list 1100 100)
-  )
+(define (RandomMove last_pos random_x random_y f h)
+  (list (- (car last_pos) (MovingFactor random_x random_y (car last_pos) (cadr last_pos) 5 5))
+        (- (cadr last_pos) (MovingFactor random_y random_x (cadr last_pos) (car last_pos) 5 5))))
 
-(define (RepaintAll positions)
+(define (RepaintAll positions ball_position)
   (Refresh
    (car positions)
    (last (cdr positions))
-   (ball_pos)
+   ball_position
    (list 0 0))
    )
 
-(Refresh
- (car (starting_pos))
- (last (cdr (starting_pos)))
- (ball_pos)
- (list 0 0))
-
-(define (CallToUpdate positions)
+(define (CallToUpdate positions ball_position)
   (reverse (UpdatePositions
-           (car (togo_pos))
+           (FollowBall ball_position)
            (cadr positions)
-           (cadr (togo_pos))
+           (FollowBall ball_position)
            (car positions)
            '(15 14 13 11 8 7 2 7 8 10 15)
            '(12 13 11 7 5 4 2 1 1 15 15)
            '(15 14 15 11 10 7 2 7 8 10 15)
            '(11 14 15 11 10 8 2 3 5 10 15)
            '(1 2 2 2 2 3 3 3 3 4 4)
-           '(1 2 2 2 2 3 3 3 3 4 4)
+           '(1 2 2 2 2 2 3 3 3 3 4)
            ))
   )
 
-(define (ActiveMoving positions)
-  (RepaintAll  positions)
-  (cond((and (Moving? (car (starting_pos)) (cadr positions)) (Moving? (cadr (starting_pos)) (car positions)))
-        (ActiveMoving (CallToUpdate positions))
+(define (ActiveMovingAux positions ball_position)
+  (RepaintAll  positions ball_position)
+  (cond((not(equal? positions (CallToUpdate positions ball_position)))
+        (ActiveMovingAux (CallToUpdate positions ball_position) (ball_pos (car positions) (cadr positions) ball_position 20 20))
         )
        (else
         positions
         ))
   )
 
-#|(displayln (reverse (UpdatePositions
-           (car (starting_pos))
-           (cadr (starting_pos))
-           (cadr (starting_pos))
-           (car (starting_pos))
-           '(15 14 13 11 8 7 2 7 8 10 15)
-           '(12 13 11 7 5 4 2 1 1 15 15)
-           '(15 14 15 11 10 7 2 7 8 10 15)
-           '(11 14 15 11 10 8 2 3 5 10 15)
-           )))
-(displayln "")
-(displayln "Starting Point")
-(displayln (starting_pos))|#
+(define (ActiveMoving positions)
+  (ActiveMovingAux positions  (ball_pos (car positions) (cadr positions) '(690 340) 10 10))
+  )
 
 (ActiveMoving (starting_pos))
 
