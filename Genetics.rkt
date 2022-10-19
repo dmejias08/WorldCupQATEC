@@ -435,45 +435,47 @@
    (cons (car attributes) (Player playerId (cdr attributes))))))
 
 
-(define (generationProcess population generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2)
-  
+(define (generationProcess population generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active)
+  (displayln generation)
   (cond
     ((equal? generation 0)
      population)
     (else
      (displayln "population")
      (displayln population)
-     (ActiveMoving (starting_pos defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2) population)
-     (generationProcess2 (Fitness population) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2))))
+     
+     (generationProcess2 (Fitness population) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2
+                         (ActiveMoving active population '(0 0))
+                         ))))
 
-(define (generationProcess2 fitness generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2)
+(define (generationProcess2 fitness generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active)
   (cond
     ((equal? generation 0)
      #f)
     (else
      (displayln "fitness")
      (displayln fitness)
-     (generationProcess3 (SortList fitness) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2))))
+     (generationProcess3 (SortList fitness) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active))))
 
-(define (generationProcess3 sortedList generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2)
+(define (generationProcess3 sortedList generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active)
   (cond
     ((equal? generation 0)
       #f)
     (else
      (displayln "sort")
      (displayln sortedList)
-     (generationProcess4 (Selection sortedList 6) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 ))))
+     (generationProcess4 (Selection sortedList 6) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active))))
 
-(define (generationProcess4 selectedPlayers generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2)
+(define (generationProcess4 selectedPlayers generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active)
     (cond
     ((equal? generation 0)
       #f)
     (else
      (displayln "selection")
      (displayln selectedPlayers)
-     (generationProcess5 (Reproduction selectedPlayers) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2))))
+     (generationProcess5 (Reproduction selectedPlayers) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active))))
 
-(define (generationProcess5 childs generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2)
+(define (generationProcess5 childs generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active)
     (cond
     ((equal? generation 0)
       #f)
@@ -481,10 +483,14 @@
      (displayln "childs")
      (displayln childs)
      (generationProcess (Population team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 childs)
-                        (- generation 1) team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2))))
+                        (- generation 1) team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active))))
 
 
 ;;(Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2))
+(define (CallGenerationProcess population generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2)
+  (generationProcess population generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2
+                     (ActiveMoving (starting_pos defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 ) population '(0 0) )) 
+  )
 
-(generationProcess (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)) 1 2 4 4 2 5 3 2)
+(CallGenerationProcess (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)) 20 2 4 4 2 5 3 2)
 
