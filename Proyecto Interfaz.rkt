@@ -10,20 +10,20 @@
 ((draw-pixmap mainWindow) "assets/futcourt.png" (make-posn 0 0))
 
 ; FUNCION PARA DIBUJAR JUGADORES
-(define (jugadores lst color_ numb)
+(define (Jugadores lst color_ numb)
   (cond ((>= (length lst) 1)
              ((draw-solid-ellipse mainWindow) (make-posn (caar lst) (last(car lst))) 20 20 color_)
-             (jugadores (cdr lst) color_ (+ numb 1))
+             (Jugadores (cdr lst) color_ (+ numb 1))
              ((draw-string mainWindow) (make-posn (+ (caar lst) 3) (+ (last(car lst)) 15)) (number->string numb)))))
 
-(define (ball lst)
-  ((draw-solid-ellipse mainWindow) (make-posn (car lst) (last lst)) 20 20 "white"))
+(define (Ball position)
+  ((draw-solid-ellipse mainWindow) (make-posn (car lst) (last position)) 20 20 "white"))
 
-(define (Refresh lst1 lst2 ball_ score)
+(define (Refresh team1 team2 ball score)
   ((draw-pixmap mainWindow) "assets/futcourt.png" (make-posn 0 0)) 
-  (jugadores lst1 "blue" 1)
-  (jugadores lst2 "red" 12)
-  (ball ball_)
+  (Jugadores team1 "blue" 1)
+  (Jugadores team2 "red" 12)
+  (ball ball)
   
   (copy-viewport mainWindow mainFrame)
   ((clear-viewport mainWindow)))
@@ -46,20 +46,40 @@
           (else
            #t)))
 
-(define (colisiones lista par)
-  (cond ((null? lista)
+(define (Collisions positions pair)
+  (cond ((null? positions)
          #t)
-        ((and (< (abs (- (caar lista)(car par))) 5 ) (< (abs (- (cadar lista)(cadr par))) 5 ))
+        ((and (< (abs (- (caar positions)(car pair))) 5 ) (< (abs (- (cadar positions)(cadr pair))) 5 ))
          #f)
         (else
-         (colisiones (cdr lista) par))))
+         (Collisions (cdr positions) pair))))
 
+(define (FollowBall pair)
+  (FollowBallAux pair '() 1))
+
+(define (FollowBallAux pair list counter)
+  (cond ((equal? counter 12)
+         list)
+        (else
+         (onceParesAux pair (cons pair list)(+ counter 1)))))
 
 (define (MovingFactor x1 y1 x2 y2 v h ID type)
   (cond ((or (> (abs (- x2 x1)) 5) (> (abs (- y2 y1)) 5))
          (cond ((and (< x1 1180) (> x1 20) (< y1 680) (> y1 20))
-                (cond ((or (and (equal? ID 1) ))))))
-         (* 0.25 (sqrt (+ (expt (+ v 3) 2) (expt (+ h 3) 2))) (/ (- x2 x1) (sqrt(+ (expt (- x2 x1) 2) (expt (- y2 y1) 2))))))
+                (cond ((or
+                        (and (equal? ID 1) (and(or (< x2 200) (> x2 975))(and (< y2 500) (> y2 175))))
+                        (and (equal? ID 2) (or (< x2 400) (> x2 800)))
+                        (and (equal? ID 3) (or (> x2 500) (< x2 700)))
+                        (and (equal? ID 4) (or (and(< x2 595)(> x2 300)) (and(> x2 605)(< x2 900))))
+                        )
+                       (cond ((or(equal? type "x"))
+                              (* 0.25 (sqrt (+ (expt (+ v 5) 2) (expt (+ h 5) 2))) (/ (- x2 x1) (sqrt(+ (expt (- x2 x1) 2) (expt (- y2 y1) 2)))))
+                              )
+                             (else (* 0.25 (sqrt (+ (expt (+ v 5) 2) (expt (+ h 5) 2))) (/ (- y2 y1) (sqrt(+ (expt (- x2 x1) 2) (expt (- y2 y1) 2)))))))
+                       )
+                      (else 0)))
+               (else 0))
+         )
         (else 0)
         )
   )
@@ -92,9 +112,9 @@
          '()
          )))
   
-(define (UpdatePositions static_list1 list_compare1 static_list2 list_compare2 velocity1 ability1 velocity2 ability2)
+(define (UpdatePositions static_list1 list_compare1 static_list2 list_compare2 velocity1 ability1 velocity2 ability2 ID1 ID2)
   
-  (UpdatePositionsAux static_list1 static_list1 list_compare1 static_list2 static_list2 list_compare2 velocity1 ability1 velocity2 ability2 1 1)
+  (UpdatePositionsAux static_list1 static_list1 list_compare1 static_list2 static_list2 list_compare2 velocity1 ability1 velocity2 ability2 ID1 ID2 1 1)
   )
 
 (define (UpdatePositionsAux static_list1 changing_list1 list_compare1 static_list2 changing_list2 list_compare2 velocity1 ability1 velocity2 ability2 ID1 ID2 counter1 counter2)
@@ -151,30 +171,43 @@
         )
   )
 
+(define (togo_pos)
+  (list
+   (oncePares (ball_pos))
+   (oncePares (ball_pos))
+   )
+  )
+
+(define (ball_pos)
+  (list 1100 100)
+  )
+
 (define (RepaintAll positions)
   (Refresh
    (car positions)
    (last (cdr positions))
-   (list 590 340)
+   (ball_pos)
    (list 0 0))
    )
 
 (Refresh
  (car (starting_pos))
  (last (cdr (starting_pos)))
- (list 590 340)
+ (ball_pos)
  (list 0 0))
 
 (define (CallToUpdate positions)
   (reverse (UpdatePositions
-           (car (starting_pos))
+           (car (togo_pos))
            (cadr positions)
-           (cadr (starting_pos))
+           (cadr (togo_pos))
            (car positions)
            '(15 14 13 11 8 7 2 7 8 10 15)
            '(12 13 11 7 5 4 2 1 1 15 15)
            '(15 14 15 11 10 7 2 7 8 10 15)
            '(11 14 15 11 10 8 2 3 5 10 15)
+           '(1 2 2 2 2 3 3 3 3 4 4)
+           '(1 2 2 2 2 3 3 3 3 4 4)
            ))
   )
 
