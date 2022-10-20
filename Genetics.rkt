@@ -186,8 +186,7 @@
 ;; It takes a population a determines its fitness counting how many ones
 ;; has in each attribute
 ;; arguments:
-;; player -> a member of the population who will mutate
-;; return: ((velocity) (strength) (ability))
+;; population -> entire population
 ;; ########################################################
 (define (Fitness population)
   (cond
@@ -198,7 +197,11 @@
 
 
 
-
+;; ########################################################
+;; Fitness Team
+;; It takes a team a determines its fitness counting how many ones
+;; has in each attribute
+;; ########################################################
 (define (FitnessTeam team)
   (cond
     ((null? team)
@@ -208,7 +211,11 @@
 
 
 
-
+;; ########################################################
+;; Fitness Player
+;; It takes an individual and calculates how many ones it has
+;; returns a list of individuls and one interger that represents fitness
+;; ########################################################
 (define (FitnessPlayer player resultPlayer)
   (cond
     ((not (list? (car player)))
@@ -217,14 +224,14 @@
      (FitnessPlayer (cdr player) (cons (car player) resultPlayer)))))
 
 
-
+;; auxiliar function 
 (define (FitnessPlayerAux player)
   (cond
     ((null? player)
      0)
     (else ( + (CountOnes (car player)) (FitnessPlayerAux (cdr player))))))
 
-
+;; auxiliar function 
 (define (CountOnes attribute)
   (cond
     ((null? attribute)
@@ -236,7 +243,11 @@
 
 
 
-
+;; ########################################################
+;; Selection
+;; Takes the first 6 elements of the sorted list after fitness
+;; returns a list of selectedNum which in this case is 6 
+;; ########################################################
 (define (Selection population selectedNum )
   (cond
     ((null? population)
@@ -245,7 +256,7 @@
      (cons (SelectionAux (car population) selectedNum ) (Selection (cdr population) selectedNum) ))))
 
 
-
+;; Auxiliar function
  (define (SelectionAux team selectedNum)
    (cond
      ((zero? selectedNum)
@@ -435,6 +446,10 @@
    (cons (car attributes) (Player playerId (cdr attributes))))))
 
 
+;; ########################################################
+;; Generation Process Main
+;; This is the starting point for the game and the genetic algorithm
+;; ########################################################
 (define (generationProcess population generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active)
   (displayln generation)
   (cond
@@ -448,6 +463,8 @@
                          (ActiveMoving (list(starting_pos defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 ) '((590 340) "r")) population (caadr active) )
                          ))))
 
+;; Auxiliar function
+;; Second stage of genetic process
 (define (generationProcess2 fitness generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active)
   (cond
     ((equal? generation 0)
@@ -457,6 +474,9 @@
      (displayln fitness)
      (generationProcess3 (SortList fitness) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active))))
 
+
+;; Auxiliar function
+;; Third stage of genetic process
 (define (generationProcess3 sortedList generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active)
   (cond
     ((equal? generation 0)
@@ -466,6 +486,9 @@
      (displayln sortedList)
      (generationProcess4 (Selection sortedList 6) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active))))
 
+
+;; Auxiliar function
+;; Fourth stage of genetic process
 (define (generationProcess4 selectedPlayers generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active)
     (cond
     ((equal? generation 0)
@@ -475,6 +498,9 @@
      (displayln selectedPlayers)
      (generationProcess5 (Reproduction selectedPlayers) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active))))
 
+
+;; Auxiliar function
+;; Fifth stage of genetic process
 (define (generationProcess5 childs generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active)
     (cond
     ((equal? generation 0)
