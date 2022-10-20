@@ -310,7 +310,7 @@
    ID2
    1
    1
-   (ball_pos static_list1 static_list2 ball_position 10 10 marker hasit)
+   (car(ball_pos static_list1 static_list2 ball_position 10 10 marker hasit))
    marker
    (cadr(ball_pos static_list1 static_list2 ball_position 10 10 marker hasit))
    )
@@ -375,7 +375,7 @@
          )
         ))
 
-; ball positions determines if there is colision and change direction of the ball
+
 (define (ball_pos team1 team2 last_pos f h marker hasit)
 (cond((and (< (car last_pos) 1200) (> (car last_pos) 0) (< (cadr last_pos) 700) (> (cadr last_pos) 0))
   (cond
@@ -415,7 +415,6 @@
   (list (- (car last_pos) (MovingFactor random_x random_y (car last_pos) (cadr last_pos) 1 1))
         (- (cadr last_pos) (MovingFactor random_y random_x (cadr last_pos) (car last_pos) 1 1))))
 
-; This calls refresh fucntion and creates de animation on canvas 
 (define (RepaintAll positions ball_position marker)
   (Refresh
    (car positions)
@@ -424,7 +423,6 @@
    marker)
    )
 
-; This function gives a new list of new positions to repaint canvas and create animation
 (define (CallToUpdate positions ball_position population marker hasit)
   (UpdatePositions
            (FollowBall ball_position)
@@ -442,6 +440,7 @@
            hasit
            )
   )
+
 
 ; Auxiliar of active moving
 (define (ActiveMovingAux positions population marker)
@@ -468,72 +467,3 @@
   (ActiveMovingAux positions population marker)
   )
 
-(ActiveMoving (list(starting_pos 4 4 2 4 4 2) '((590 340) "b")) '(
-  (((0 1 1 1) (1 0 1 1) (1 1 0 1) 2)
-   ((0 1 1 0) (0 1 0 1) (0 0 1 1) 2)
-   ((0 0 1 1) (0 1 0 1) (1 0 1 0) 2)
-   ((1 0 0 1) (1 0 1 0) (1 0 1 1) 2)
-   ((0 1 1 1) (0 1 0 0) (1 1 0 1) 2)
-   ((0 0 1 1) (1 0 1 0) (0 0 1 1) 3)
-   ((0 0 1 1) (0 0 0 0) (1 1 0 1) 3)
-   ((0 1 0 0) (0 1 0 1) (0 0 0 1) 3)
-   ((0 1 1 1) (1 1 0 0) (0 1 1 0) 4)
-   ((1 1 1 0) (0 0 1 1) (0 1 0 1) 4)
-   ((1 0 1 0) (1 1 0 1) (0 1 1 0) 1))
-  (((1 1 1 0) (1 0 1 0) (1 0 1 1) 2)
-   ((0 1 0 1) (0 1 1 1) (1 1 1 1) 2)
-   ((0 1 0 1) (0 0 1 0) (0 1 0 0) 2)
-   ((0 1 0 0) (0 0 0 1) (0 0 0 0) 2)
-   ((0 1 1 1) (0 1 1 0) (0 0 1 1) 3)
-   ((0 1 1 0) (1 0 0 0) (0 0 0 1) 3)
-   ((0 1 0 1) (0 0 1 0) (0 1 0 0) 3)
-   ((0 0 1 1) (0 0 0 0) (1 1 0 0) 3)
-   ((0 0 0 1) (0 0 1 0) (0 0 0 1) 4)
-   ((0 0 0 0) (0 0 1 1) (0 0 0 0) 4)
-   ((0 0 0 1) (0 0 0 1) (0 0 1 1) 1))) '(0 0))
-  
-
-;;Meter en generation2
-
-#|(CallToUpdate(CallToUpdate (UpdatePositions
-           (car (starting_pos))
-           (cadr(starting_pos))
-           (cadr(starting_pos))
-           (car (starting_pos))
-           '(15 14 13 11 8 7 2 7 8 10 15)
-           '(12 13 11 7 5 4 2 1 1 15 15)
-           '(15 14 15 11 10 7 2 7 8 10 15)
-           '(11 14 15 11 10 8 2 3 5 10 15)
-           )))|#
-
-
-#|
-(Refresh
-            (ModifyPosition static_list1 list_compare1 counter1 velocity1 ability1)
-            (ModifyPosition static_list2 list_compare2 counter2 velocity2 ability2)
-            (list 590 340)
-            (list 0 0))
-           (sleep/yield 1)
-(sleep/yield 0.1)
-(Refresh (list (list 75 340) (list 150 600) (list 200 450) (list 200 250) (list 150 100) (list 300 600) (list 350 450) (list 350 250) (list 300 100) (list 500 500) (list 500 200)) (list (list 1100 340) (list 900 340)) (list 590 340) (list 1 0))
-(sleep/yield 0.1)
-(Refresh (list (list 80 340) (list 625 115) (list 755 322) (list 1145 545) (list 655 125) (list 500 340)) (list (list 1095 340) (list 900 340)) (list 590 340) (list 1 1))
-(sleep/yield 0.1)
-(Refresh (list (list 85 340) (list 625 115) (list 755 322) (list 1145 545) (list 655 125)(list 505 340)) (list (list 1090 340) (list 900 340)) (list 590 340) (list 2 1))
-|#
-;;(define (nave posx posy lad)
-;;(cond 
-;;((equal? lad 'u)
-;;    ((draw-solid-rectangle ventana) (make-posn posx posy) 10 10 "black"))
-;;((equal? lad 'd)
-;;        ((draw-solid-rectangle ventana) (make-posn posx posy) 10 10 "black"))
-;;((equal? lad 'l)
-;;        ((draw-solid-rectangle ventana) (make-posn posx posy) 10 10 "black"))
-;;((equal? lad 'r)
-;;        ((draw-solid-rectangle ventana) (make-posn posx posy) 10 10 "black"))
-;;(else
-;;(void))
-;;)
-;;)
-
-;; 442
