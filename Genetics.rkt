@@ -445,7 +445,7 @@
      (displayln population)
      
      (generationProcess2 (Fitness population) generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2
-                         (ActiveMoving (list(starting_pos defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 ) '((590 340) "r")) population (cadr active) )
+                         (ActiveMoving (list(starting_pos defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 ) '((590 340) "r")) population (caadr active) )
                          ))))
 
 (define (generationProcess2 fitness generation team defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 active)
@@ -491,5 +491,7 @@
                      (ActiveMoving (list(starting_pos defenders1 midFielders1 forwards1 defenders2 midFielders2 forwards2 ) '((590 340) "r")) population '(0 0) )) 
   )
 
-(CallGenerationProcess (Population 2 4 4 2 5 3 2 (GeneratePopulationAttributes 2)) 20 2 4 4 2 5 3 2)
+(define (main defendersA midFieldersA forwardsA defendersB midFieldersB forwardsB gens)
+  (CallGenerationProcess (Population 2 defendersA midFieldersA forwardsA defendersB midFieldersB forwardsB (GeneratePopulationAttributes 2)) gens 2 defendersA midFieldersA forwardsA defendersB midFieldersB forwardsB))
 
+(main 5 3 2 4 4 2 20)
