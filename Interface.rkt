@@ -349,10 +349,10 @@
 (cond((and (< (car last_pos) 1200) (> (car last_pos) 0) (< (cadr last_pos) 700) (> (cadr last_pos) 0))
   (cond
     ((and (< (car last_pos) 1200) (> (car last_pos) 1150) (< (cadr last_pos) 415) (> (cadr last_pos) 260))
-     (list '(590 340) hasit)
+     (list '(590 340) "m")
      )
     ((and (< (car last_pos) 25) (> (car last_pos) 0) (< (cadr last_pos) 415) (> (cadr last_pos) 260))
-     (list '(590 340) hasit)
+     (list '(590 340) "n")
      )
     (else
      (cond ((and(Collisions team1 last_pos) (Collisions team2 last_pos))
@@ -412,12 +412,21 @@
 
 (define (ActiveMovingAux positions population marker)
   (RepaintAll  (car positions) (caadr positions) marker)
-  (cond((not(equal? (car positions) (car(CallToUpdate (car positions) (caadr positions) population marker (cddr positions)))))
-        (ActiveMovingAux (CallToUpdate (car positions) (caadr positions) population marker (cddr positions)) population marker)
-        )
-       (else
-        positions
-        ))
+  (cond(
+        (or(equal?(last (cadr positions)) "n")(equal?(last (cadr positions)) "m"))
+        (cond((equal? (last (cadr positions)) "m")
+              (list positions ( ModifyList (list marker) 1 (list (+ (car marker) 1) (cadr marker)) ))
+              )
+             (else
+              (list positions ( ModifyList (list marker) 1 (list (car marker) (+ (cadr marker) 1)) ))
+              ))
+
+        ) (else
+           (cond ((not(equal? (car positions) (car(CallToUpdate (car positions) (caadr positions) population marker (last (cadr positions))))))
+                  (ActiveMovingAux (CallToUpdate (car positions) (caadr positions) population marker (cddr positions)) population marker)
+        
+                  )))
+          )
   )
 
 (define (ActiveMoving positions population marker)
